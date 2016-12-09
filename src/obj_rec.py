@@ -87,7 +87,7 @@ def main():
         x_train, \
         y_train, \
         batch_size=32, \
-        nb_epoch=1, \
+        nb_epoch=10, \
         verbose=1, \
         validation_split=0.1)
 
@@ -99,6 +99,18 @@ def main():
     #plot_training_history(history)
 
     # Predict test images classes
+    img_classes = (
+        "airplane", \
+        "automobile", \
+        "bird", \
+        "cat", \
+        "deer", \
+        "dog", \
+        "frog", \
+        "horse", \
+        "ship", \
+        "truck")
+
     y_hat = model.predict_classes(x_test)
     y_test_array = y_test.argmax(1)
     pd.crosstab(y_hat, y_test_array)
@@ -106,11 +118,10 @@ def main():
     plt.figure(figsize=(15, 15))
     for ind, val in enumerate(test_wrong[:20]):
         plt.subplot(10, 10, ind + 1)
-        print val[0]
-        im = 1 - val[0].reshape(32, 32)
+        im = val[0]
         plt.axis("off")
-        plt.text(0, 0, val[2], fontsize=14, color='green') # correct
-        plt.text(8, 0, val[1], fontsize=14, color='red')  # predicted
+        plt.text(0, 0, img_classes[val[2]], fontsize=14, color='green') # correct
+        plt.text(0, 32, img_classes[val[1]], fontsize=14, color='red')  # predicted
         plt.imshow(im, cmap='gray')
     plt.show()
 
