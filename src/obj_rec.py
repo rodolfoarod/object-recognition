@@ -1,5 +1,3 @@
-#import sys
-
 from keras.models import Sequential
 from keras.layers import Convolution2D
 from keras.layers import Activation
@@ -10,16 +8,10 @@ from keras.layers import Dropout
 from keras.utils import np_utils
 from keras import backend as K
 import matplotlib.pyplot as plt
-##from keras.models import model_from_json
+import pandas as pd
 
 def main():
     """Main Function"""
-
-    # print "Usage: obj_rec.py [-evaluate numLayerBlocks]"
-
-    # if (len(sys.argv) == 3) and (str(sys.argv[1]) == "-evaluate"):
-    #     print "\nNumber of layer blocks: %d" % int(sys.argv[2])
-    #     sys.exit()
 
     ## load data set
     x_train, y_train, x_test, y_test, input_shape = load_cifar10_dataset()
@@ -95,18 +87,33 @@ def main():
         x_train, \
         y_train, \
         batch_size=32, \
-        nb_epoch=3, \
+        nb_epoch=1, \
         verbose=1, \
         validation_split=0.1)
 
     ## test the model
-    score = model.evaluate(x_test, y_test)
-    print "\nTest accuracy: %0.05f" % score[1]
+    #score = model.evaluate(x_test, y_test)
+    #print "\nTest accuracy: %0.05f" % score[1]
 
-    #results = model.predict_classes(x_test, verbose=1)
-    #print results
+    # Graph with training accuracy
+    #plot_training_history(history)
 
-    plot_training_history(history)
+    # Predict test images classes
+    y_hat = model.predict_classes(x_test)
+    y_test_array = y_test.argmax(1)
+    pd.crosstab(y_hat, y_test_array)
+    test_wrong = [im for im in zip(x_test, y_hat, y_test_array) if im[1] != im[2]]
+    plt.figure(figsize=(15, 15))
+    for ind, val in enumerate(test_wrong[:20]):
+        plt.subplot(10, 10, ind + 1)
+        print val[0]
+        im = 1 - val[0].reshape(32, 32)
+        plt.axis("off")
+        plt.text(0, 0, val[2], fontsize=14, color='green') # correct
+        plt.text(8, 0, val[1], fontsize=14, color='red')  # predicted
+        plt.imshow(im, cmap='gray')
+    plt.show()
+
 
 def load_cifar10_dataset():
     """Loads CIFAR10 data set"""
