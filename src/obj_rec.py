@@ -1,25 +1,25 @@
+#import sys
+
 from keras.models import Sequential
 from keras.layers import Convolution2D
 from keras.layers import Activation
 from keras.layers import MaxPooling2D
-from keras.layers import Dense, Dropout, Flatten
+from keras.layers import Dense
+from keras.layers import Flatten
+from keras.layers import Dropout
 from keras.utils import np_utils
 from keras import backend as K
-
-## Data Set: cifar10
-## 0 - airplane 
-## 1 - automobile 
-## 2 - bird 
-## 3 - cat 
-## 4 - deer 
-## 5 - dog 
-## 6 - frog 
-## 7 - horse 
-## 8 - ship 
-## 9 - truck
+import matplotlib.pyplot as plt
+##from keras.models import model_from_json
 
 def main():
     """Main Function"""
+
+    # print "Usage: obj_rec.py [-evaluate numLayerBlocks]"
+
+    # if (len(sys.argv) == 3) and (str(sys.argv[1]) == "-evaluate"):
+    #     print "\nNumber of layer blocks: %d" % int(sys.argv[2])
+    #     sys.exit()
 
     ## load data set
     x_train, y_train, x_test, y_test, input_shape = load_cifar10_dataset()
@@ -34,23 +34,44 @@ def main():
 
     ## Convolution operator for filtering windows of two-dimensional inputs
     model.add(Convolution2D(
-        nb_filters, kernel_size[0], kernel_size[1], \
-        border_mode='valid', input_shape=input_shape))
+        nb_filters, \
+        kernel_size[0], \
+        kernel_size[1], \
+        border_mode='valid', \
+        input_shape=input_shape))
 
     ## Activation layer with relu
     model.add(Activation('relu'))
 
-    model.add(Convolution2D(nb_filters, kernel_size[0], kernel_size[1]))
+    model.add(Convolution2D(
+        nb_filters, \
+        kernel_size[0], \
+        kernel_size[1]))
 
     model.add(Activation('relu'))
 
+    ## Max Pooling
     model.add(MaxPooling2D(pool_size=pool_size))
 
+    # Dropout consists in randomly setting a fraction p
+    # of input units to 0 at each update during training time,
+    # which helps prevent overfitting.
     model.add(Dropout(0.25))
 
+    model.add(Convolution2D(64, 3, 3))
+    model.add(Activation('relu'))
+
+    model.add(Convolution2D(64, 3, 3))
+    model.add(Activation('relu'))
+
+    model.add(MaxPooling2D(pool_size=pool_size))
+    model.add(Dropout(0.25))
+
+    ## Flattens the input. Does not affect the batch size.
     model.add(Flatten())
 
-    model.add(Dense(128))
+    ## Regular fully connected NN layer
+    model.add(Dense(512))
 
     model.add(Activation('relu'))
 
@@ -60,6 +81,9 @@ def main():
 
     model.add(Activation('softmax'))
 
+    ## model summary
+    model.summary()
+
     ## Configures the learning process
     model.compile(
         loss='categorical_crossentropy', \
@@ -67,10 +91,10 @@ def main():
         metrics=['accuracy'])
 
     ## train the model
-    model.fit(
+    history = model.fit(
         x_train, \
         y_train, \
-        batch_size=64, \
+        batch_size=32, \
         nb_epoch=3, \
         verbose=1, \
         validation_split=0.1)
@@ -78,6 +102,11 @@ def main():
     ## test the model
     score = model.evaluate(x_test, y_test)
     print "\nTest accuracy: %0.05f" % score[1]
+
+    #results = model.predict_classes(x_test, verbose=1)
+    #print results
+
+    plot_training_history(history)
 
 def load_cifar10_dataset():
     """Loads CIFAR10 data set"""
@@ -112,6 +141,14 @@ def load_cifar10_dataset():
     y_train = np_utils.to_categorical(y_train, 10)
     y_test = np_utils.to_categorical(y_test, 10)
     return (x_train, y_train, x_test, y_test, input_shape)
+
+def plot_training_history(history):
+    """Draws a graph with the trainning history"""
+    plt.plot(history.history['val_acc'])
+    plt.ylabel('accuracy')
+    plt.xlabel('epochs')
+    plt.legend(['validation accuracy'], loc='upper left')
+    plt.show()
 
 if __name__ == '__main__':
     main()
