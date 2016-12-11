@@ -1,9 +1,10 @@
+import sys
+import argparse
 import matplotlib.pyplot as plt
 #import pandas as pd
-#import sys
 
 from keras.models import Sequential
-#from keras.models import load_model
+from keras.models import load_model
 from keras.layers import Convolution2D
 from keras.layers import Activation
 from keras.layers import MaxPooling2D
@@ -16,87 +17,105 @@ from keras import backend as K
 def main():
     """Main Function"""
 
+    # Usage: obj_rec.py [-h] [-l FILENAME] [-e]
+    parser = argparse.ArgumentParser(
+        description='Object Recognition - Deep Learning')
+    parser.add_argument(
+        '-l', '--load', type=str, help='load model file', \
+        metavar='FILENAME')
+    parser.add_argument(
+        '-e', '--evaluate', help='evaluate model with test images', \
+        action='store_true')
+    args = parser.parse_args()
+
     # load data set
     x_train, y_train, x_test, y_test, input_shape = load_cifar10_dataset()
 
-    # print "\nLoading model"
-    # model = load_model('obj_rec_model.h5')
-    # score = model.evaluate(x_test, y_test)
-    # print "\nTest accuracy: %0.05f" % score[1]
-    # sys.exit()
+    if args.load:
+        print "\nLoading Model"
+        model = load_model(args.load)
+        model.summary()
+        print "Model successfully loaded"
 
-    # create model
-    nb_filters = 32
-    pool_size = (2, 2)
-    kernel_size = (3, 3)
+    if args.evaluate:
+        score = model.evaluate(x_test, y_test)
+        print "\nTest accuracy: %0.05f" % score[1]
+        sys.exit()
 
-    # the sequential model is a linear stack of layers
-    model = Sequential()
+    if not args.load:
 
-    # Convolution operator for filtering windows of two-dimensional inputs
-    model.add(Convolution2D(
-        nb_filters, \
-        kernel_size[0], \
-        kernel_size[1], \
-        border_mode='valid', \
-        input_shape=input_shape))
+        # create model
+        nb_filters = 32
+        pool_size = (2, 2)
+        kernel_size = (3, 3)
 
-    # Activation layer with relu
-    model.add(Activation('relu'))
+        # the sequential model is a linear stack of layers
+        model = Sequential()
 
-    model.add(Convolution2D(
-        nb_filters, \
-        kernel_size[0], \
-        kernel_size[1]))
+        # Convolution operator for filtering windows of two-dimensional inputs
+        model.add(Convolution2D(
+            nb_filters, \
+            kernel_size[0], \
+            kernel_size[1], \
+            border_mode='valid', \
+            input_shape=input_shape))
 
-    model.add(Activation('relu'))
+        # Activation layer with relu
+        model.add(Activation('relu'))
 
-    # Max Pooling
-    model.add(MaxPooling2D(pool_size=pool_size))
+        model.add(Convolution2D(
+            nb_filters, \
+            kernel_size[0], \
+            kernel_size[1]))
 
-    # Dropout consists in randomly setting a fraction p
-    # of input units to 0 at each update during training time,
-    # which helps prevent overfitting.
-    model.add(Dropout(0.25))
+        model.add(Activation('relu'))
 
-    model.add(Convolution2D(64, 3, 3))
-    model.add(Activation('relu'))
+        # Max Pooling
+        model.add(MaxPooling2D(pool_size=pool_size))
 
-    model.add(Convolution2D(64, 3, 3))
-    model.add(Activation('relu'))
+        # Dropout consists in randomly setting a fraction p
+        # of input units to 0 at each update during training time,
+        # which helps prevent overfitting.
+        model.add(Dropout(0.25))
 
-    model.add(MaxPooling2D(pool_size=pool_size))
-    model.add(Dropout(0.25))
+        model.add(Convolution2D(64, 3, 3))
+        model.add(Activation('relu'))
 
-    # Flattens the input. Does not affect the batch size.
-    model.add(Flatten())
+        model.add(Convolution2D(64, 3, 3))
+        model.add(Activation('relu'))
 
-    # Regular fully connected NN layer
-    model.add(Dense(512))
+        model.add(MaxPooling2D(pool_size=pool_size))
+        model.add(Dropout(0.25))
 
-    model.add(Activation('relu'))
+        # Flattens the input. Does not affect the batch size.
+        model.add(Flatten())
 
-    model.add(Dropout(0.5))
+        # Regular fully connected NN layer
+        model.add(Dense(512))
 
-    model.add(Dense(10))
+        model.add(Activation('relu'))
 
-    model.add(Activation('softmax'))
+        model.add(Dropout(0.5))
 
-    # model summary
-    model.summary()
+        model.add(Dense(10))
 
-    # Configures the learning process
-    model.compile(
-        loss='categorical_crossentropy', \
-        optimizer='adadelta', \
-        metrics=['accuracy'])
+        model.add(Activation('softmax'))
+
+        # model summary
+        model.summary()
+
+        # Configures the learning process
+        model.compile(
+            loss='categorical_crossentropy', \
+            optimizer='adadelta', \
+            metrics=['accuracy'])
 
     # train the model
     history = model.fit(
         x_train, \
         y_train, \
         batch_size=32, \
-        nb_epoch=50, \
+        nb_epoch=5, \
         verbose=1, \
         validation_split=0.1)
 
