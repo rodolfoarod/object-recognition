@@ -1,4 +1,9 @@
+import matplotlib.pyplot as plt
+#import pandas as pd
+#import sys
+
 from keras.models import Sequential
+#from keras.models import load_model
 from keras.layers import Convolution2D
 from keras.layers import Activation
 from keras.layers import MaxPooling2D
@@ -7,24 +12,28 @@ from keras.layers import Flatten
 from keras.layers import Dropout
 from keras.utils import np_utils
 from keras import backend as K
-import matplotlib.pyplot as plt
-import pandas as pd
 
 def main():
     """Main Function"""
 
-    ## load data set
+    # load data set
     x_train, y_train, x_test, y_test, input_shape = load_cifar10_dataset()
 
-    ## create model
+    # print "\nLoading model"
+    # model = load_model('obj_rec_model.h5')
+    # score = model.evaluate(x_test, y_test)
+    # print "\nTest accuracy: %0.05f" % score[1]
+    # sys.exit()
+
+    # create model
     nb_filters = 32
     pool_size = (2, 2)
     kernel_size = (3, 3)
 
-    ## the sequential model is a linear stack of layers
+    # the sequential model is a linear stack of layers
     model = Sequential()
 
-    ## Convolution operator for filtering windows of two-dimensional inputs
+    # Convolution operator for filtering windows of two-dimensional inputs
     model.add(Convolution2D(
         nb_filters, \
         kernel_size[0], \
@@ -32,7 +41,7 @@ def main():
         border_mode='valid', \
         input_shape=input_shape))
 
-    ## Activation layer with relu
+    # Activation layer with relu
     model.add(Activation('relu'))
 
     model.add(Convolution2D(
@@ -42,7 +51,7 @@ def main():
 
     model.add(Activation('relu'))
 
-    ## Max Pooling
+    # Max Pooling
     model.add(MaxPooling2D(pool_size=pool_size))
 
     # Dropout consists in randomly setting a fraction p
@@ -59,10 +68,10 @@ def main():
     model.add(MaxPooling2D(pool_size=pool_size))
     model.add(Dropout(0.25))
 
-    ## Flattens the input. Does not affect the batch size.
+    # Flattens the input. Does not affect the batch size.
     model.add(Flatten())
 
-    ## Regular fully connected NN layer
+    # Regular fully connected NN layer
     model.add(Dense(512))
 
     model.add(Activation('relu'))
@@ -73,57 +82,64 @@ def main():
 
     model.add(Activation('softmax'))
 
-    ## model summary
+    # model summary
     model.summary()
 
-    ## Configures the learning process
+    # Configures the learning process
     model.compile(
         loss='categorical_crossentropy', \
         optimizer='adadelta', \
         metrics=['accuracy'])
 
-    ## train the model
+    # train the model
     history = model.fit(
         x_train, \
         y_train, \
         batch_size=32, \
-        nb_epoch=10, \
+        nb_epoch=50, \
         verbose=1, \
         validation_split=0.1)
 
-    ## test the model
-    #score = model.evaluate(x_test, y_test)
-    #print "\nTest accuracy: %0.05f" % score[1]
+    # test the model
+    score = model.evaluate(x_test, y_test)
+    print "\nTest accuracy: %0.05f" % score[1]
 
     # Graph with training accuracy
-    #plot_training_history(history)
+    plot_training_history(history)
+
+    # Saves model in a HDF5 file, includes:
+    # Architecture of the model
+    # Weights of the model
+    # Training config
+    # State of the optimizer
+    model.save('obj_rec_model.h5')
 
     # Predict test images classes
-    img_classes = (
-        "airplane", \
-        "automobile", \
-        "bird", \
-        "cat", \
-        "deer", \
-        "dog", \
-        "frog", \
-        "horse", \
-        "ship", \
-        "truck")
+    # img_classes = (
+    #     "airplane", \
+    #     "automobile", \
+    #     "bird", \
+    #     "cat", \
+    #     "deer", \
+    #     "dog", \
+    #     "frog", \
+    #     "horse", \
+    #     "ship", \
+    #     "truck")
 
-    y_hat = model.predict_classes(x_test)
-    y_test_array = y_test.argmax(1)
-    pd.crosstab(y_hat, y_test_array)
-    test_wrong = [im for im in zip(x_test, y_hat, y_test_array) if im[1] != im[2]]
-    plt.figure(figsize=(15, 15))
-    for ind, val in enumerate(test_wrong[:20]):
-        plt.subplot(10, 10, ind + 1)
-        im = val[0]
-        plt.axis("off")
-        plt.text(0, 0, img_classes[val[2]], fontsize=14, color='green') # correct
-        plt.text(0, 32, img_classes[val[1]], fontsize=14, color='red')  # predicted
-        plt.imshow(im, cmap='gray')
-    plt.show()
+    # y_hat = model.predict_classes(x_test)
+    # y_test_array = y_test.argmax(1)
+    # pd.crosstab(y_hat, y_test_array)
+    # test_wrong = [im for im in zip(x_test, y_hat, y_test_array) if im[1] != im[2]]
+    # plt.figure(figsize=(15, 15))
+    # for ind, val in enumerate(test_wrong[:20]):
+    #     plt.subplot(10, 10, ind + 1)
+    #     im = val[0]
+    #     plt.axis("off")
+    #     plt.text(0, 0, img_classes[val[2]], fontsize=14, color='green') # correct
+    #     plt.text(0, 32, img_classes[val[1]], fontsize=14, color='red')  # predicted
+    #     plt.imshow(im, cmap='gray')
+    # plt.show()
 
 
 def load_cifar10_dataset():
