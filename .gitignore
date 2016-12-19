@@ -90,3 +90,6 @@ ENV/
 
 # VS Code files
 c_cpp_properties.json
+
+# Image Folder
+svm/img/
