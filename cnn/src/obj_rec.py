@@ -1,7 +1,7 @@
 import sys
 import argparse
 import matplotlib.pyplot as plt
-#import pandas as pd
+import pandas as pd
 
 from keras.models import Sequential
 from keras.models import load_model
@@ -26,6 +26,9 @@ def main():
     parser.add_argument(
         '-e', '--evaluate', help='evaluate model with test images', \
         action='store_true')
+    parser.add_argument(
+        '-s', '--showerrors', help='show classification errors', \
+        action='store_true')
     args = parser.parse_args()
 
     # load data set
@@ -40,6 +43,11 @@ def main():
     if args.evaluate:
         score = model.evaluate(x_test, y_test)
         print "\nTest accuracy: %0.05f" % score[1]
+
+    if args.showerrors:
+        show_class_errors(model, x_test, y_test)
+
+    if args.evaluate or args.showerrors:
         sys.exit()
 
     if not args.load:
@@ -133,33 +141,6 @@ def main():
     # State of the optimizer
     model.save('obj_rec_model.h5')
 
-    # Predict test images classes
-    # img_classes = (
-    #     "airplane", \
-    #     "automobile", \
-    #     "bird", \
-    #     "cat", \
-    #     "deer", \
-    #     "dog", \
-    #     "frog", \
-    #     "horse", \
-    #     "ship", \
-    #     "truck")
-
-    # y_hat = model.predict_classes(x_test)
-    # y_test_array = y_test.argmax(1)
-    # pd.crosstab(y_hat, y_test_array)
-    # test_wrong = [im for im in zip(x_test, y_hat, y_test_array) if im[1] != im[2]]
-    # plt.figure(figsize=(15, 15))
-    # for ind, val in enumerate(test_wrong[:20]):
-    #     plt.subplot(10, 10, ind + 1)
-    #     im = val[0]
-    #     plt.axis("off")
-    #     plt.text(0, 0, img_classes[val[2]], fontsize=14, color='green') # correct
-    #     plt.text(0, 32, img_classes[val[1]], fontsize=14, color='red')  # predicted
-    #     plt.imshow(im, cmap='gray')
-    # plt.show()
-
 
 def load_cifar10_dataset():
     """Loads CIFAR10 data set"""
@@ -201,6 +182,35 @@ def plot_training_history(history):
     plt.ylabel('accuracy')
     plt.xlabel('epochs')
     plt.legend(['validation accuracy'], loc='upper left')
+    plt.show()
+
+def show_class_errors(model, x_test, y_test):
+    """Shows classification errors"""
+    # Predict test images classes
+    img_classes = (
+        "airplane", \
+        "automobile", \
+        "bird", \
+        "cat", \
+        "deer", \
+        "dog", \
+        "frog", \
+        "horse", \
+        "ship", \
+        "truck")
+
+    y_hat = model.predict_classes(x_test)
+    y_test_array = y_test.argmax(1)
+    pd.crosstab(y_hat, y_test_array)
+    test_wrong = [im for im in zip(x_test, y_hat, y_test_array) if im[1] != im[2]]
+    plt.figure(figsize=(15, 15))
+    for ind, val in enumerate(test_wrong[:20]):
+        plt.subplot(10, 10, ind + 1)
+        im = val[0]
+        plt.axis("off")
+        plt.text(0, 0, img_classes[val[2]], fontsize=14, color='green') # correct
+        plt.text(0, 32, img_classes[val[1]], fontsize=14, color='red')  # predicted
+        plt.imshow(im, cmap='gray')
     plt.show()
 
 if __name__ == '__main__':
