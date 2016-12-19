@@ -2,7 +2,7 @@ CXX = g++
 CXXFLAGS = -O2 -g -Wall -fmessage-length=0
 CPPFLAGS = -I/usr/local/include
 
-OBJS =      ./src/main.o
+OBJS =      ./src/main.o ./src/svm.o
 
 LDFLAGS = -L/usr/local/lib
 LDLIBS =  -lopencv_core -lopencv_imgproc -lopencv_calib3d -lopencv_video \
