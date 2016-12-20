@@ -2,10 +2,6 @@
 // MAIN.CPP
 // ============================
 
-#include <iostream>
-
-#include <opencv2/opencv.hpp>
-
 #include "svm.hpp"
 
 // Main Function
@@ -13,7 +9,17 @@ int main(int argc, const char* argv[]) {
 
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
 
-    loadImgBatch();
-    
+    cv::initModule_nonfree();
+
+    ObjRec obj_rec(10,1000);
+    cv::Mat descriptors = obj_rec.getDescriptors();
+    cv::Mat vocabulary = obj_rec.getVocabulary(descriptors);
+
+    cv::Mat trainData;
+    cv::Mat trainLabels;
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels);
+
+    std::cout << trainData << std::endl;
+
     return 0;
 }
