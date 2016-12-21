@@ -7,6 +7,7 @@ ObjRec::ObjRec(int nWords, int nTrainImg)
 {
     this->nWords = nWords;
     this->nTrainImg = nTrainImg;
+    
 }
 
 cv::Mat ObjRec::getDescriptors()
@@ -112,6 +113,13 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
     cv::Mat bowDescriptor;
     std::vector<cv::KeyPoint> keypoints;
 
+    // Open csv file with labels for each train image
+    std::ifstream infile("img/train/trainLabels.csv");
+
+    // Remove header from csv file
+    std::string s;
+    std::getline(infile, s);
+
     int n_img = this->nTrainImg;
     for(int i=1; i<=n_img; i++)
     {
@@ -139,7 +147,77 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
         bowDE.compute(image, keypoints, bowDescriptor);
         trainData.push_back(bowDescriptor);
 
+        // Store train labels
+        if(!std::getline(infile, s))
+        {
+            continue;
+        }
+
+        std::istringstream ss(s);
+        std::getline(ss, s, ',');
+        std::getline(ss, s, ',');
+
+        // std::cout << s << " = " << getLabelVal(s) << std::endl;
+        trainLabels.push_back((float) getLabelVal(s));
+
     }
 
+}
+
+int ObjRec::getLabelVal(std::string label)
+{
+    int labelVal = -1;
+
+    if (label.compare("airplane") == 0)
+    {
+        labelVal = 0;
+    }
+
+    if (label.compare("automobile") == 0)
+    {
+        labelVal = 1;
+    }
+
+    if (label.compare("bird") == 0)
+    {
+        labelVal = 2;
+    }
+
+    if (label.compare("cat") == 0)
+    {
+        labelVal = 3;
+    }
+    
+    if (label.compare("deer") == 0)
+    {
+        labelVal = 4;
+    }
+
+    if (label.compare("dog") == 0)
+    {
+        labelVal = 5;
+    }
+
+    if (label.compare("frog") == 0)
+    {
+        labelVal = 6;
+    }
+
+    if (label.compare("horse") == 0)
+    {
+        labelVal = 7;
+    }
+
+    if (label.compare("ship") == 0)
+    {
+        labelVal = 8;
+    }
+
+    if (label.compare("truck") == 0)
+    {
+        labelVal = 9;
+    }
+
+    return labelVal;
 
 }

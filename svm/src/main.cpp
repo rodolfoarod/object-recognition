@@ -11,7 +11,7 @@ int main(int argc, const char* argv[]) {
 
     cv::initModule_nonfree();
 
-    ObjRec obj_rec(10,1000);
+    ObjRec obj_rec(5,10);
     cv::Mat descriptors = obj_rec.getDescriptors();
     cv::Mat vocabulary = obj_rec.getVocabulary(descriptors);
 
@@ -20,6 +20,7 @@ int main(int argc, const char* argv[]) {
     obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels);
 
     std::cout << trainData << std::endl;
+    std::cout << trainLabels << std::endl;
 
     return 0;
 }

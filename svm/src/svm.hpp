@@ -8,6 +8,8 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <fstream>
+#include <map>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -33,6 +35,10 @@ public:
 
     // Get BoW histogram for each training images
     void prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, cv::Mat& trainLabels);
+
+    // Get int value for image label
+    int getLabelVal(std::string label);
+
 };
 
 #endif /* svm_hpp */
