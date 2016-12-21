@@ -15,6 +15,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/nonfree/nonfree.hpp>
 #include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/ml/ml.hpp>
 
 class ObjRec
 {
@@ -38,6 +39,12 @@ public:
 
     // Get int value for image label
     int getLabelVal(std::string label);
+
+    // Train SVM classifier
+    int trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::SVM& svm);
+
+    // Test SVM classifier
+    int testSVM(const cv::Mat& vocabulary, const cv::SVM& svm);
 
 };
 
