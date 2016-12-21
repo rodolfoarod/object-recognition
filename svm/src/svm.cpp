@@ -27,13 +27,13 @@ cv::Mat ObjRec::getDescriptors()
     int n_img = this->nTrainImg;
     for(int i=1; i<=n_img; i++)
     {
-        std::cout << i << "/" << n_img << std::endl;
+        std::cout << i << "/10000" << std::endl;
 
         // Clear string stream
         oss.str(std::string());
 
         // Build filename
-        oss << "img/train/" << i << ".png";
+        oss << "img/" << i << ".png";
         std::string fileName = oss.str();
 
         image = cv::imread(fileName, CV_LOAD_IMAGE_GRAYSCALE);
@@ -114,7 +114,7 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
     std::vector<cv::KeyPoint> keypoints;
 
     // Open csv file with labels for each train image
-    std::ifstream infile("img/train/trainLabels.csv");
+    std::ifstream infile("img/trainLabels.csv");
 
     // Remove header from csv file
     std::string s;
@@ -123,13 +123,13 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
     int n_img = this->nTrainImg;
     for(int i=1; i<=n_img; i++)
     {
-        std::cout << i << "/" << n_img << std::endl;
+        std::cout << i << "/10000" << std::endl;
 
         // Clear string stream
         oss.str(std::string());
 
         // Build filename
-        oss << "img/train/" << i << ".png";
+        oss << "img/" << i << ".png";
         std::string fileName = oss.str();
 
         image = cv::imread(fileName, CV_LOAD_IMAGE_GRAYSCALE);
@@ -142,6 +142,13 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
 
         // Detects features in an image
         detector->detect(image, keypoints);
+
+        // TODO: CHANGE THIS!!!!!!!
+        if(keypoints.empty())
+        {
+            std::cout <<  "Could not find keypoints in the image" << std::endl;
+            continue;
+        }
 
         // Computes an image descriptor using the set visual vocabulary.
         bowDE.compute(image, keypoints, bowDescriptor);
@@ -284,7 +291,7 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
     std::vector<cv::KeyPoint> keypoints;
 
     // Open csv file with labels for each train image
-    std::ifstream infile("img/test/trainLabels.csv");
+    std::ifstream infile("img/trainLabels.csv");
 
     // Remove header from csv file
     std::string s;
@@ -292,15 +299,15 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
 
     // TODO: CHANGE THIS!!!!!!!
     int n_img = this->nTrainImg;
-    for(int i=n_img+1; i<=n_img+200; i++)
+    for(int i=n_img+1; i<=n_img+8000; i++)
     {
-        std::cout << i << "/" << n_img << std::endl;
+        std::cout << i << "/10000" << std::endl;
 
         // Clear string stream
         oss.str(std::string());
 
         // Build filename
-        oss << "img/train/" << i << ".png";
+        oss << "img/" << i << ".png";
         std::string fileName = oss.str();
 
         image = cv::imread(fileName, CV_LOAD_IMAGE_GRAYSCALE);
@@ -313,6 +320,13 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
 
         // Detects features in an image
         detector->detect(image, keypoints);
+
+        // TODO: CHANGE THIS!!!!!!!
+        if(keypoints.empty())
+        {
+            std::cout <<  "Could not find keypoints in the image" << std::endl;
+            continue;
+        }
 
         // Computes an image descriptor using the set visual vocabulary.
         bowDE.compute(image, keypoints, bowDescriptor);

@@ -11,7 +11,9 @@ int main(int argc, const char* argv[]) {
 
     cv::initModule_nonfree();
 
-    ObjRec obj_rec(10,1000);
+    int nWords = atoi(std::string(argv[1]).c_str());
+
+    ObjRec obj_rec(nWords,2000);
     cv::Mat descriptors = obj_rec.getDescriptors();
     cv::Mat vocabulary = obj_rec.getVocabulary(descriptors);
 
