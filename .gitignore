@@ -92,4 +92,5 @@ ENV/
 c_cpp_properties.json
 
 # Image Folder
-svm/img/
+svm_rank/img/
+svm_oaa/img/
