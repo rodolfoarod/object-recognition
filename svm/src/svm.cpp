@@ -146,6 +146,7 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
         // TODO: CHANGE THIS!!!!!!!
         if(keypoints.empty())
         {
+            std::getline(infile, s);
             std::cout <<  "Could not find keypoints in the image" << std::endl;
             continue;
         }
@@ -166,7 +167,7 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
         std::getline(ss, s, ',');
 
         //std::cout << s << " = " << getLabelVal(s) << std::endl;
-        trainLabels.push_back((float) getLabelVal(s));        
+        trainLabels.push_back((float) getLabelVal(s));      
 
     }
 
@@ -241,7 +242,7 @@ int ObjRec::trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::S
         2.0, 
         8.0, 
         1.0, 
-        1.0, 
+        100.0, // Cvalue
         0.5, 
         0.1, 
         NULL, 
@@ -299,7 +300,13 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
 
     // TODO: CHANGE THIS!!!!!!!
     int n_img = this->nTrainImg;
-    for(int i=n_img+1; i<=n_img+8000; i++)
+    
+    for(int i=1; i<=n_img; i++)
+    {
+        std::getline(infile, s);
+    }
+
+    for(int i=n_img+1; i<=n_img+2000; i++)
     {
         std::cout << i << "/10000" << std::endl;
 
@@ -324,6 +331,7 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
         // TODO: CHANGE THIS!!!!!!!
         if(keypoints.empty())
         {
+            std::getline(infile, s);
             std::cout <<  "Could not find keypoints in the image" << std::endl;
             continue;
         }
