@@ -24,10 +24,10 @@ cv::Mat ObjRec::getDescriptors()
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("SIFT");
     cv::Ptr<cv::DescriptorExtractor> extractor = cv::DescriptorExtractor::create("SIFT");
 
-    int n_img = this->nTrainImg;
+    int n_img = (this->nTrainImg * 0.8);
     for(int i=1; i<=n_img; i++)
     {
-        std::cout << i << "/10000" << std::endl;
+        std::cout << i << "/" << this->nTrainImg << std::endl;
 
         // Clear string stream
         oss.str(std::string());
@@ -120,10 +120,10 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
     std::string s;
     std::getline(infile, s);
 
-    int n_img = this->nTrainImg;
+    int n_img = (this->nTrainImg * 0.8);
     for(int i=1; i<=n_img; i++)
     {
-        std::cout << i << "/10000" << std::endl;
+        std::cout << i << "/" << this->nTrainImg << std::endl;
 
         // Clear string stream
         oss.str(std::string());
@@ -242,7 +242,7 @@ int ObjRec::trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::S
         2.0, 
         8.0, 
         1.0, 
-        100.0, // Cvalue
+        1.0, // Cvalue
         0.5, 
         0.1, 
         NULL, 
@@ -299,16 +299,16 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
     std::getline(infile, s);
 
     // TODO: CHANGE THIS!!!!!!!
-    int n_img = this->nTrainImg;
+    int n_img = (this->nTrainImg * 0.8);
     
     for(int i=1; i<=n_img; i++)
     {
         std::getline(infile, s);
     }
 
-    for(int i=n_img+1; i<=n_img+2000; i++)
+    for(int i=n_img+1; i<=n_img+(this->nTrainImg * 0.2); i++)
     {
-        std::cout << i << "/10000" << std::endl;
+        std::cout << i << "/" << this->nTrainImg << std::endl;
 
         // Clear string stream
         oss.str(std::string());
