@@ -236,23 +236,14 @@ int ObjRec::trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::S
     std::cout << "[Object Recognition] Training SVM" << std::endl;
 
     // SVM Parameters
-	CvSVMParams params = CvSVMParams(
-        CvSVM::C_SVC, // Type of a SVM formulation
-        CvSVM::RBF, // Type of a SVM kernel - CvSVM::RBF Radial basis function (RBF), a good choice in most cases
-        2.0, 
-        8.0, 
-        1.0, 
-        1.0, // Cvalue
-        0.5, 
-        0.1, 
-        NULL, 
-        cvTermCriteria(CV_TERMCRIT_EPS, 1000, FLT_EPSILON)); // Termination criteria of the iterative SVM training procedure
+    CvSVMParams params;
 
     // Train SVM
     svm.train(trainData, trainLabels, cv::Mat(), cv::Mat(), params);
 
     // Store trained SVM
-    svm.save("train_model.svm");
+    // TODO: CHANGE THIS!!!!!
+    // svm.save("train_model.svm");
 
     return 0;
 }
