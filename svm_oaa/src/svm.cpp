@@ -46,6 +46,11 @@ cv::Mat ObjRec::getDescriptors()
         // Detects features in an image
         detector->detect(image, keypoints);
 
+        if(keypoints.empty())
+        {
+            continue;
+        }
+
         // Computes the descriptors for a set of keypoints detected in an image
         extractor->compute(image, keypoints, descriptors);
 
@@ -272,11 +277,7 @@ int ObjRec::trainSVM(const cv::Mat &trainData, const cv::Mat &trainLabels, cv::S
     CvSVMParams params;
 
     // Train SVM
-    svm.train(trainData, trainLabels, cv::Mat(), cv::Mat(), params);
-
-    // Store trained SVM
-    // TODO: CHANGE THIS!!!!!
-    // svm.save("train_model.svm");
+    svm.train_auto(trainData, trainLabels, cv::Mat(), cv::Mat(), params);
 
     return 0;
 }

@@ -25,6 +25,10 @@ int main(int argc, const char* argv[]) {
         balanced = true;
     }
 
+    std::cout << "Num Words = " << nWords << std::endl;
+    std::cout << "Num Img   = " << nTrainImg << std::endl;
+    std::cout << "Balanced  = " << balanced << std::endl;
+
     ObjRec obj_rec(nWords,nTrainImg);
     cv::Mat descriptors = obj_rec.getDescriptors();
     cv::Mat vocabulary = obj_rec.getVocabulary(descriptors);
