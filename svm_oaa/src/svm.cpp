@@ -150,7 +150,6 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
         // Detects features in an image
         detector->detect(image, keypoints);
 
-        // TODO: CHANGE THIS!!!!!!!
         if (keypoints.empty())
         {
             std::getline(infile, s);
@@ -329,9 +328,7 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
     std::string s;
     std::getline(infile, s);
 
-    // TODO: CHANGE THIS!!!!!!!
     int n_img = (this->nTrainImg * 0.8);
-
     for (int i = 1; i <= n_img; i++)
     {
         std::getline(infile, s);
@@ -359,7 +356,6 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
         // Detects features in an image
         detector->detect(image, keypoints);
 
-        // TODO: CHANGE THIS!!!!!!!
         if (keypoints.empty())
         {
             std::getline(infile, s);
