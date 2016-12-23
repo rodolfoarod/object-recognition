@@ -35,7 +35,7 @@ public:
     cv::Mat getVocabulary(const cv::Mat& descriptors);
 
     // Get BoW histogram for each training images
-    void prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, cv::Mat& trainLabels);
+    void prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, cv::Mat& trainLabels, std::string classLabel);
 
     // Get int value for image label
     int getLabelVal(std::string label);
@@ -44,7 +44,7 @@ public:
     int trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::SVM& svm);
 
     // Test SVM classifier
-    int testSVM(const cv::Mat& vocabulary, const cv::SVM& svm);
+    int testSVM(const cv::Mat& vocabulary, const cv::SVM& svm, std::string classLabel);
 
 };
 

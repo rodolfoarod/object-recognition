@@ -7,7 +7,6 @@ ObjRec::ObjRec(int nWords, int nTrainImg)
 {
     this->nWords = nWords;
     this->nTrainImg = nTrainImg;
-    
 }
 
 cv::Mat ObjRec::getDescriptors()
@@ -16,8 +15,8 @@ cv::Mat ObjRec::getDescriptors()
 
     cv::Mat image;
     cv::Mat descriptors;
-    cv::Mat allDescriptors; 
-    std::vector<cv::KeyPoint> keypoints; 
+    cv::Mat allDescriptors;
+    std::vector<cv::KeyPoint> keypoints;
 
     std::cout << "[Object Recognition] Features Extraction" << std::endl;
 
@@ -25,7 +24,7 @@ cv::Mat ObjRec::getDescriptors()
     cv::Ptr<cv::DescriptorExtractor> extractor = cv::DescriptorExtractor::create("SIFT");
 
     int n_img = (this->nTrainImg * 0.8);
-    for(int i=1; i<=n_img; i++)
+    for (int i = 1; i <= n_img; i++)
     {
         std::cout << i << "/" << this->nTrainImg << std::endl;
 
@@ -38,12 +37,12 @@ cv::Mat ObjRec::getDescriptors()
 
         image = cv::imread(fileName, CV_LOAD_IMAGE_GRAYSCALE);
 
-        if(!image.data)                          
+        if (!image.data)
         {
-            std::cout <<  "Could not open or find the image" << std::endl;
+            std::cout << "Could not open or find the image" << std::endl;
             continue;
         }
-        
+
         // Detects features in an image
         detector->detect(image, keypoints);
 
@@ -55,10 +54,9 @@ cv::Mat ObjRec::getDescriptors()
     }
 
     return allDescriptors;
-
 }
 
-cv::Mat ObjRec::getVocabulary(const cv::Mat& descriptors)
+cv::Mat ObjRec::getVocabulary(const cv::Mat &descriptors)
 {
     cv::Mat vocabulary;
 
@@ -67,7 +65,7 @@ cv::Mat ObjRec::getVocabulary(const cv::Mat& descriptors)
 
     // number of words
     int clusterCount = this->nWords;
-    
+
     // the number of times the algorithm is executed using different initial labellings
     int attempts = 1;
 
@@ -76,31 +74,32 @@ cv::Mat ObjRec::getVocabulary(const cv::Mat& descriptors)
 
     // kmeans -based class to train visual vocabulary using the bag of visual words approach
     cv::BOWKMeansTrainer bowTrainer(clusterCount, cv::TermCriteria(), attempts, flags);
-    
+
     // input descriptors are clustered, returns the vocabulary
     vocabulary = bowTrainer.cluster(descriptors);
 
     return vocabulary;
 }
 
-void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, cv::Mat& trainLabels)
+void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, cv::Mat &trainLabels, std::string classLabel)
 {
     std::cout << "[Object Recognition] BoW - Getting BoW histogram for each training images" << std::endl;
+    std::cout << "[Object Recognition] Class Label: " << classLabel << std::endl;
 
     // Detects keypoints in an image
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("SIFT");
 
     // Descriptor extractor that is used to compute descriptors for an input image and its keypoints
     cv::Ptr<cv::DescriptorExtractor> extractor = cv::DescriptorExtractor::create("SIFT");
-    
-    // Descriptor matcher that is used to find the nearest word of the trained vocabulary 
+
+    // Descriptor matcher that is used to find the nearest word of the trained vocabulary
     // for each keypoint descriptor of the image
     cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
 
     // compute an image descriptor using the bag of visual words
     // 1 - Compute descriptors for a given image and its keypoints set.
     // 2 - Find the nearest visual words from the vocabulary for each keypoint descriptor.
-    // 3 - Compute the bag-of-words image descriptor as is 
+    // 3 - Compute the bag-of-words image descriptor as is
     // a normalized histogram of vocabulary words encountered in the image
     cv::BOWImgDescriptorExtractor bowDE(extractor, matcher);
 
@@ -120,8 +119,11 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
     std::string s;
     std::getline(infile, s);
 
+    int counterPos = 0;
+    int counterNeg = 0;
+
     int n_img = (this->nTrainImg * 0.8);
-    for(int i=1; i<=n_img; i++)
+    for (int i = 1; i <= n_img; i++)
     {
         std::cout << i << "/" << this->nTrainImg << std::endl;
 
@@ -134,9 +136,9 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
 
         image = cv::imread(fileName, CV_LOAD_IMAGE_GRAYSCALE);
 
-        if(!image.data)                          
+        if (!image.data)
         {
-            std::cout <<  "Could not open or find the image" << std::endl;
+            std::cout << "Could not open or find the image" << std::endl;
             continue;
         }
 
@@ -144,20 +146,19 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
         detector->detect(image, keypoints);
 
         // TODO: CHANGE THIS!!!!!!!
-        if(keypoints.empty())
+        if (keypoints.empty())
         {
             std::getline(infile, s);
-            std::cout <<  "Could not find keypoints in the image" << std::endl;
+            std::cout << "Could not find keypoints in the image" << std::endl;
             continue;
         }
 
         // Computes an image descriptor using the set visual vocabulary.
         bowDE.compute(image, keypoints, bowDescriptor);
-        trainData.push_back(bowDescriptor);
 
         // Store train labels
-        if(!std::getline(infile, s))
-        {   
+        if (!std::getline(infile, s))
+        {
             std::cout << "Unable to get label line" << std::endl;
             continue;
         }
@@ -166,11 +167,22 @@ void ObjRec::prepareSVMtrainData(const cv::Mat& vocabulary, cv::Mat& trainData, 
         std::getline(ss, s, ',');
         std::getline(ss, s, ',');
 
-        //std::cout << s << " = " << getLabelVal(s) << std::endl;
-        trainLabels.push_back((float) getLabelVal(s));      
-
+        if (s.compare(classLabel) == 0)
+        {
+            trainData.push_back(bowDescriptor);
+            trainLabels.push_back((float)1);
+            counterPos++;
+        }
+        else
+        {
+            if(counterNeg < counterPos)
+            {
+                trainData.push_back(bowDescriptor);
+                trainLabels.push_back((float)-1);
+                counterNeg++;
+            }
+        }
     }
-
 }
 
 int ObjRec::getLabelVal(std::string label)
@@ -196,7 +208,7 @@ int ObjRec::getLabelVal(std::string label)
     {
         labelVal = 3;
     }
-    
+
     if (label.compare("deer") == 0)
     {
         labelVal = 4;
@@ -228,10 +240,9 @@ int ObjRec::getLabelVal(std::string label)
     }
 
     return labelVal;
-
 }
 
-int ObjRec::trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::SVM& svm)
+int ObjRec::trainSVM(const cv::Mat &trainData, const cv::Mat &trainLabels, cv::SVM &svm)
 {
     std::cout << "[Object Recognition] Training SVM" << std::endl;
 
@@ -248,7 +259,7 @@ int ObjRec::trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::S
     return 0;
 }
 
-int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
+int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm, std::string classLabel)
 {
     std::cout << "[Object Recognition] Testing SVM" << std::endl;
 
@@ -261,15 +272,15 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
 
     // Descriptor extractor that is used to compute descriptors for an input image and its keypoints
     cv::Ptr<cv::DescriptorExtractor> extractor = cv::DescriptorExtractor::create("SIFT");
-    
-    // Descriptor matcher that is used to find the nearest word of the trained vocabulary 
+
+    // Descriptor matcher that is used to find the nearest word of the trained vocabulary
     // for each keypoint descriptor of the image
     cv::Ptr<cv::DescriptorMatcher> matcher = cv::DescriptorMatcher::create("FlannBased");
 
     // compute an image descriptor using the bag of visual words
     // 1 - Compute descriptors for a given image and its keypoints set.
     // 2 - Find the nearest visual words from the vocabulary for each keypoint descriptor.
-    // 3 - Compute the bag-of-words image descriptor as is 
+    // 3 - Compute the bag-of-words image descriptor as is
     // a normalized histogram of vocabulary words encountered in the image
     cv::BOWImgDescriptorExtractor bowDE(extractor, matcher);
 
@@ -291,13 +302,13 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
 
     // TODO: CHANGE THIS!!!!!!!
     int n_img = (this->nTrainImg * 0.8);
-    
-    for(int i=1; i<=n_img; i++)
+
+    for (int i = 1; i <= n_img; i++)
     {
         std::getline(infile, s);
     }
 
-    for(int i=n_img+1; i<=n_img+(this->nTrainImg * 0.2); i++)
+    for (int i = n_img + 1; i <= n_img + (this->nTrainImg * 0.2); i++)
     {
         std::cout << i << "/" << this->nTrainImg << std::endl;
 
@@ -310,9 +321,9 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
 
         image = cv::imread(fileName, CV_LOAD_IMAGE_GRAYSCALE);
 
-        if(!image.data)                          
+        if (!image.data)
         {
-            std::cout <<  "Could not open or find the image" << std::endl;
+            std::cout << "Could not open or find the image" << std::endl;
             continue;
         }
 
@@ -320,10 +331,10 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
         detector->detect(image, keypoints);
 
         // TODO: CHANGE THIS!!!!!!!
-        if(keypoints.empty())
+        if (keypoints.empty())
         {
             std::getline(infile, s);
-            std::cout <<  "Could not find keypoints in the image" << std::endl;
+            std::cout << "Could not find keypoints in the image" << std::endl;
             continue;
         }
 
@@ -332,7 +343,7 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
         testData.push_back(bowDescriptor);
 
         // Store train labels
-        if(!std::getline(infile, s))
+        if (!std::getline(infile, s))
         {
             continue;
         }
@@ -342,7 +353,25 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
         std::getline(ss, s, ',');
 
         // std::cout << s << " = " << getLabelVal(s) << std::endl;
-        testLabels.push_back((float) getLabelVal(s));
+        //testLabels.push_back((float)getLabelVal(s));
+
+        if(s.compare(classLabel) == 0)
+        {
+            testLabels.push_back((float)1);
+        }
+        else
+        {
+            testLabels.push_back((float)-1);
+        }
+
+        // float classification = svm.predict(bowDescriptor);
+        // if(classification ==  1.0)
+        // {
+        //     std::cout << "Class = " << classification << std::endl;
+        //     std::cout << s << std::endl;
+        //     float distance = svm.predict(bowDescriptor, true);
+        //     std::cout << "Dist = " << distance << std::endl;
+        // }
 
         // Test SVM
         float classification = svm.predict(bowDescriptor);
@@ -351,9 +380,8 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm)
     }
 
     // Calculate classification rate
-    double rate = 1 - ((double) cv::countNonZero(testLabels - testClass) / testData.rows);
+    double rate = 1 - ((double)cv::countNonZero(testLabels - testClass) / testData.rows);
     std::cout << "[Object Recognition] Classification Rate = " << rate << std::endl;
 
     return 0;
-
 }
