@@ -176,7 +176,7 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
             if (s.compare(classLabel) == 0)
             {
                 trainData.push_back(bowDescriptor);
-                trainLabels.push_back((float)1);
+                trainLabels.push_back(1);
                 counterPos++;
             }
             else
@@ -184,7 +184,7 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
                 if (counterNeg < counterPos)
                 {
                     trainData.push_back(bowDescriptor);
-                    trainLabels.push_back((float)-1);
+                    trainLabels.push_back(-1);
                     counterNeg++;
                 }
             }
@@ -194,13 +194,13 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
             if (s.compare(classLabel) == 0)
             {
                 trainData.push_back(bowDescriptor);
-                trainLabels.push_back((float)1);
+                trainLabels.push_back(1);
                 counterPos++;
             }
             else
             {
                 trainData.push_back(bowDescriptor);
-                trainLabels.push_back((float)-1);
+                trainLabels.push_back(-1);
                 counterNeg++;
             }
         }
@@ -288,12 +288,8 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
     cv::Mat testData;
     cv::Mat testLabels;
     cv::Mat testClass;
-    int n_distance = 10;
-    float distances[n_distance];
-    float distance = 0.0;
-
-    int matchCounter[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    int labelCounter[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int n_class = 10;
+    double distances[n_class];
 
     // Detects keypoints in an image
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("SIFT");
@@ -381,50 +377,40 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
         testLabels.push_back(getLabelVal(s));
 
         // airplane
-        distance = svmVec[0]->predict(bowDescriptor, true);
-        distances[0] = distance;
-
+        distances[0] = svmVec[0]->predict(bowDescriptor, true);
+        
         // automobile
-        distance = svmVec[1]->predict(bowDescriptor, true);
-        distances[1] = distance;
-
+        distances[1] = svmVec[1]->predict(bowDescriptor, true);
+        
         // bird
-        distance = svmVec[2]->predict(bowDescriptor, true);
-        distances[2] = distance;
-
+        distances[2] = svmVec[2]->predict(bowDescriptor, true);
+        
         // cat
-        distance = svmVec[3]->predict(bowDescriptor, true);
-        distances[3] = distance;
+        distances[3] = svmVec[3]->predict(bowDescriptor, true);
         
         // deer
-        distance = svmVec[4]->predict(bowDescriptor, true);
-        distances[4] = distance;
-
+        distances[4] = svmVec[4]->predict(bowDescriptor, true);
+        
         // dog
-        distance = svmVec[5]->predict(bowDescriptor, true);
-        distances[5] = distance;
-
+        distances[5] = svmVec[5]->predict(bowDescriptor, true);
+        
         // frog
-        distance = svmVec[6]->predict(bowDescriptor, true);
-        distances[6] = distance;
-
+        distances[6] = svmVec[6]->predict(bowDescriptor, true);
+        
         // horse
-        distance = svmVec[7]->predict(bowDescriptor, true);
-        distances[7] = distance;
-
+        distances[7] = svmVec[7]->predict(bowDescriptor, true);
+        
         // ship
-        distance = svmVec[8]->predict(bowDescriptor, true);
-        distances[8] = distance;
-
+        distances[8] = svmVec[8]->predict(bowDescriptor, true);
+        
         // truck
-        distance = svmVec[9]->predict(bowDescriptor, true);
-        distances[9] = distance;
-
+        distances[9] = svmVec[9]->predict(bowDescriptor, true);
+        
         // Get SVM classification
         int classification = -1;
-        float dist = std::numeric_limits<float>::max();
+        double dist = std::numeric_limits<double>::max();
 
-        for(int z=0; z<n_distance; z++)
+        for(int z=0; z<n_class; z++)
         {
             if(distances[z] < dist)
             {
@@ -433,25 +419,19 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
             }
         }
 
-        labelCounter[getLabelVal(s)]++;
-        if(classification == getLabelVal(s))
-        {
-            matchCounter[getLabelVal(s)]++;
-        }
-
         testClass.push_back(classification);
 
+        // Calculate classification rate
+        double rateIt = 1 - ((double)cv::countNonZero(testLabels - testClass) / testData.rows);
+        std::cout << "Iteration Rate = " << rateIt << std::endl;
+
     }
 
-    for(int r=0; r<10; r++)
-    {
-        std::cout << "Class " << r << " = " << matchCounter[r] << "/" << labelCounter[r] << " = " 
-<< (double)matchCounter[r] / labelCounter[r] << std::endl;
-    }
+    std::cout << "[Object Recognition] Final Results " << std::endl;
 
     // Calculate classification rate
     double rate = 1 - ((double)cv::countNonZero(testLabels - testClass) / testData.rows);
-    std::cout << "[Object Recognition] Classification Rate = " << rate << std::endl;
+    std::cout << "Classification Rate = " << rate << std::endl;
 
     return 0;
 }
