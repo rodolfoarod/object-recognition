@@ -9,8 +9,8 @@ int main(int argc, const char* argv[]) {
 
     std::cout << "OpenCV Version: " << CV_VERSION << std::endl;
 
-    if (argc != 3) {
-		std::cout << "Usage: ./obj_rec_svm nWords nTrainImg" << std::endl;
+    if (argc > 4) {
+		std::cout << "Usage: ./obj_rec_svm nWords nTrainImg [balanced]" << std::endl;
 		exit(-1);
 	}
 
@@ -18,6 +18,12 @@ int main(int argc, const char* argv[]) {
 
     int nWords = atoi(std::string(argv[1]).c_str());
     int nTrainImg = atoi(std::string(argv[2]).c_str());
+    int balanced = false;
+
+    if((argc == 4) && (std::string(argv[3]).compare("balanced") == 0))
+    {
+        balanced = true;
+    }
 
     ObjRec obj_rec(nWords,nTrainImg);
     cv::Mat descriptors = obj_rec.getDescriptors();
@@ -31,7 +37,7 @@ int main(int argc, const char* argv[]) {
     
     // airplane
     cv::SVM airplaneSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "airplane");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "airplane", balanced);
     obj_rec.trainSVM(trainData, trainLabels, airplaneSVM);
     svmVec.push_back(&airplaneSVM);
     trainData.release();
@@ -39,7 +45,7 @@ int main(int argc, const char* argv[]) {
 
     // automobile
     cv::SVM automobileSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "automobile");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "automobile", balanced);
     obj_rec.trainSVM(trainData, trainLabels, automobileSVM);
     svmVec.push_back(&automobileSVM);
     trainData.release();
@@ -47,7 +53,7 @@ int main(int argc, const char* argv[]) {
 
     // bird
     cv::SVM birdSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "bird");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "bird", balanced);
     obj_rec.trainSVM(trainData, trainLabels, birdSVM);
     svmVec.push_back(&birdSVM);
     trainData.release();
@@ -55,7 +61,7 @@ int main(int argc, const char* argv[]) {
 
     // cat
     cv::SVM catSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "cat");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "cat", balanced);
     obj_rec.trainSVM(trainData, trainLabels, catSVM);
     svmVec.push_back(&catSVM);
     trainData.release();
@@ -63,7 +69,7 @@ int main(int argc, const char* argv[]) {
 
     // deer
     cv::SVM deerSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "deer");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "deer", balanced);
     obj_rec.trainSVM(trainData, trainLabels, deerSVM);
     svmVec.push_back(&deerSVM);
     trainData.release();
@@ -71,7 +77,7 @@ int main(int argc, const char* argv[]) {
 
     // dog
     cv::SVM dogSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "dog");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "dog", balanced);
     obj_rec.trainSVM(trainData, trainLabels, dogSVM);
     svmVec.push_back(&dogSVM);
     trainData.release();
@@ -79,7 +85,7 @@ int main(int argc, const char* argv[]) {
 
     // frog
     cv::SVM frogSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "frog");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "frog", balanced);
     obj_rec.trainSVM(trainData, trainLabels, frogSVM);
     svmVec.push_back(&frogSVM);
     trainData.release();
@@ -87,7 +93,7 @@ int main(int argc, const char* argv[]) {
 
     // horse
     cv::SVM horseSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "horse");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "horse", balanced);
     obj_rec.trainSVM(trainData, trainLabels, horseSVM);
     svmVec.push_back(&horseSVM);
     trainData.release();
@@ -95,7 +101,7 @@ int main(int argc, const char* argv[]) {
 
     // ship
     cv::SVM shipSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "ship");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "ship", balanced);
     obj_rec.trainSVM(trainData, trainLabels, shipSVM);
     svmVec.push_back(&shipSVM);
     trainData.release();
@@ -103,7 +109,7 @@ int main(int argc, const char* argv[]) {
 
     // truck
     cv::SVM truckSVM;
-    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "truck");
+    obj_rec.prepareSVMtrainData(vocabulary, trainData, trainLabels, "truck", balanced);
     obj_rec.trainSVM(trainData, trainLabels, truckSVM);
     svmVec.push_back(&truckSVM);
     trainData.release();

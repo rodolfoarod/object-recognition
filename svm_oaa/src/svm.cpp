@@ -81,7 +81,7 @@ cv::Mat ObjRec::getVocabulary(const cv::Mat &descriptors)
     return vocabulary;
 }
 
-void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, cv::Mat &trainLabels, std::string classLabel)
+void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, cv::Mat &trainLabels, std::string classLabel, bool balanced)
 {
     std::cout << "[Object Recognition] Train data for SVM: " << classLabel << std::endl;
 
@@ -167,15 +167,33 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
         std::getline(ss, s, ',');
         std::getline(ss, s, ',');
 
-        if (s.compare(classLabel) == 0)
+        if (balanced)
         {
-            trainData.push_back(bowDescriptor);
-            trainLabels.push_back((float)1);
-            counterPos++;
+            if (s.compare(classLabel) == 0)
+            {
+                trainData.push_back(bowDescriptor);
+                trainLabels.push_back((float)1);
+                counterPos++;
+            }
+            else
+            {
+                if (counterNeg < counterPos)
+                {
+                    trainData.push_back(bowDescriptor);
+                    trainLabels.push_back((float)-1);
+                    counterNeg++;
+                }
+            }
         }
         else
         {
-            if(counterNeg < counterPos)
+            if (s.compare(classLabel) == 0)
+            {
+                trainData.push_back(bowDescriptor);
+                trainLabels.push_back((float)1);
+                counterPos++;
+            }
+            else
             {
                 trainData.push_back(bowDescriptor);
                 trainLabels.push_back((float)-1);
@@ -183,6 +201,9 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
             }
         }
     }
+
+    std::cout << "Pos Samples = " << counterPos << std::endl;
+    std::cout << "Neg Samples = " << counterNeg << std::endl;
 
 }
 
@@ -341,7 +362,7 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
         if (keypoints.empty())
         {
             std::getline(infile, s);
-            std::cout << "Could not find keypoints in the image" << std::endl;
+            //std::cout << "Could not find keypoints in the image" << std::endl;
             continue;
         }
 
@@ -404,14 +425,14 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
 
         // Get SVM classification
         int classification = -1;
-        float maxDist = 0;
+        float dist = std::numeric_limits<float>::max();
 
         for(int z=0; z<n_distance; z++)
         {
-            if((distances[z] < 0) && (std::abs(distances[z]) > maxDist))
+            if(distances[z] < dist)
             {
                 classification = z;
-                maxDist = std::abs(distances[z]);
+                dist = distances[z];
             }
         }
 
@@ -427,7 +448,8 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
 
     for(int r=0; r<10; r++)
     {
-        std::cout << "Class " << r << " = " << matchCounter[r] << "/" << labelCounter[r] << std::endl;
+        std::cout << "Class " << r << " = " << matchCounter[r] << "/" << labelCounter[r] << " = " 
+<< (double)matchCounter[r] / labelCounter[r] << std::endl;
     }
 
     // Calculate classification rate
