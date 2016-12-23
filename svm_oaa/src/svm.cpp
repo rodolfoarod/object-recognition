@@ -259,13 +259,16 @@ int ObjRec::trainSVM(const cv::Mat &trainData, const cv::Mat &trainLabels, cv::S
     return 0;
 }
 
-int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm, std::string classLabel)
+int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVec)
 {
     std::cout << "[Object Recognition] Testing SVM" << std::endl;
 
     cv::Mat testData;
     cv::Mat testLabels;
     cv::Mat testClass;
+    int n_distance = 10;
+    float distances[n_distance];
+    float distance = 0.0;
 
     // Detects keypoints in an image
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("SIFT");
@@ -353,28 +356,60 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const cv::SVM& svm, std::string c
         std::getline(ss, s, ',');
 
         // std::cout << s << " = " << getLabelVal(s) << std::endl;
-        //testLabels.push_back((float)getLabelVal(s));
+        testLabels.push_back((float)getLabelVal(s));
 
-        if(s.compare(classLabel) == 0)
+        // airplane
+        distance = svmVec[0]->predict(bowDescriptor, true);
+        distances[0] = distance;
+
+        // automobile
+        distance = svmVec[1]->predict(bowDescriptor, true);
+        distances[1] = distance;
+
+        // bird
+        distance = svmVec[2]->predict(bowDescriptor, true);
+        distances[2] = distance;
+
+        // cat
+        distance = svmVec[3]->predict(bowDescriptor, true);
+        distances[3] = distance;
+        
+        // deer
+        distance = svmVec[4]->predict(bowDescriptor, true);
+        distances[4] = distance;
+
+        // dog
+        distance = svmVec[5]->predict(bowDescriptor, true);
+        distances[5] = distance;
+
+        // frog
+        distance = svmVec[6]->predict(bowDescriptor, true);
+        distances[6] = distance;
+
+        // horse
+        distance = svmVec[7]->predict(bowDescriptor, true);
+        distances[7] = distance;
+
+        // ship
+        distance = svmVec[8]->predict(bowDescriptor, true);
+        distances[8] = distance;
+
+        // truck
+        distance = svmVec[9]->predict(bowDescriptor, true);
+        distances[9] = distance;
+
+        // Get SVM classification
+        float classification = -1.0;
+        int maxDist = 0;
+        for(int z=0; z<n_distance; z++)
         {
-            testLabels.push_back((float)1);
-        }
-        else
-        {
-            testLabels.push_back((float)-1);
+            if(maxDist > distances[z])
+            {
+                classification = z;
+                maxDist = distances[z];
+            }
         }
 
-        // float classification = svm.predict(bowDescriptor);
-        // if(classification ==  1.0)
-        // {
-        //     std::cout << "Class = " << classification << std::endl;
-        //     std::cout << s << std::endl;
-        //     float distance = svm.predict(bowDescriptor, true);
-        //     std::cout << "Dist = " << distance << std::endl;
-        // }
-
-        // Test SVM
-        float classification = svm.predict(bowDescriptor);
         testClass.push_back(classification);
 
     }

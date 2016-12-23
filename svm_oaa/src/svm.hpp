@@ -44,7 +44,7 @@ public:
     int trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::SVM& svm);
 
     // Test SVM classifier
-    int testSVM(const cv::Mat& vocabulary, const cv::SVM& svm, std::string classLabel);
+    int testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVec);
 
 };
 
