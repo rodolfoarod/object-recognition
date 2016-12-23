@@ -83,8 +83,7 @@ cv::Mat ObjRec::getVocabulary(const cv::Mat &descriptors)
 
 void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, cv::Mat &trainLabels, std::string classLabel)
 {
-    std::cout << "[Object Recognition] BoW - Getting BoW histogram for each training images" << std::endl;
-    std::cout << "[Object Recognition] Class Label: " << classLabel << std::endl;
+    std::cout << "[Object Recognition] Train data for SVM: " << classLabel << std::endl;
 
     // Detects keypoints in an image
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("SIFT");
@@ -125,7 +124,8 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
     int n_img = (this->nTrainImg * 0.8);
     for (int i = 1; i <= n_img; i++)
     {
-        std::cout << i << "/" << this->nTrainImg << std::endl;
+        // TODO: CHANGE THIS!!!!
+        //std::cout << i << "/" << this->nTrainImg << std::endl;
 
         // Clear string stream
         oss.str(std::string());
@@ -149,7 +149,7 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
         if (keypoints.empty())
         {
             std::getline(infile, s);
-            std::cout << "Could not find keypoints in the image" << std::endl;
+            //std::cout << "Could not find keypoints in the image" << std::endl;
             continue;
         }
 
@@ -183,6 +183,7 @@ void ObjRec::prepareSVMtrainData(const cv::Mat &vocabulary, cv::Mat &trainData, 
             }
         }
     }
+
 }
 
 int ObjRec::getLabelVal(std::string label)
@@ -270,6 +271,9 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
     float distances[n_distance];
     float distance = 0.0;
 
+    int matchCounter[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    int labelCounter[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
     // Detects keypoints in an image
     cv::Ptr<cv::FeatureDetector> detector = cv::FeatureDetector::create("SIFT");
 
@@ -356,7 +360,7 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
         std::getline(ss, s, ',');
 
         // std::cout << s << " = " << getLabelVal(s) << std::endl;
-        testLabels.push_back((float)getLabelVal(s));
+        testLabels.push_back(getLabelVal(s));
 
         // airplane
         distance = svmVec[0]->predict(bowDescriptor, true);
@@ -399,19 +403,31 @@ int ObjRec::testSVM(const cv::Mat& vocabulary, const std::vector<cv::SVM*> svmVe
         distances[9] = distance;
 
         // Get SVM classification
-        float classification = -1.0;
-        int maxDist = 0;
+        int classification = -1;
+        float maxDist = 0;
+
         for(int z=0; z<n_distance; z++)
         {
-            if(maxDist > distances[z])
+            if((distances[z] < 0) && (std::abs(distances[z]) > maxDist))
             {
                 classification = z;
-                maxDist = distances[z];
+                maxDist = std::abs(distances[z]);
             }
+        }
+
+        labelCounter[getLabelVal(s)]++;
+        if(classification == getLabelVal(s))
+        {
+            matchCounter[getLabelVal(s)]++;
         }
 
         testClass.push_back(classification);
 
+    }
+
+    for(int r=0; r<10; r++)
+    {
+        std::cout << "Class " << r << " = " << matchCounter[r] << "/" << labelCounter[r] << std::endl;
     }
 
     // Calculate classification rate
