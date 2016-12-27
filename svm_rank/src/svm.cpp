@@ -239,7 +239,7 @@ int ObjRec::trainSVM(const cv::Mat& trainData, const cv::Mat& trainLabels, cv::S
     CvSVMParams params;
 
     // Train SVM
-    svm.train_auto(trainData, trainLabels, cv::Mat(), cv::Mat(), params);
+    svm.train(trainData, trainLabels, cv::Mat(), cv::Mat(), params);
 
     // Store trained SVM
     // TODO: CHANGE THIS!!!!!
