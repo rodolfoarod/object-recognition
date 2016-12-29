@@ -94,3 +94,7 @@ c_cpp_properties.json
 # Image Folder
 svm_rank/img/
 svm_oaa/img/
+
+# Latex Article
+*.fdb_latexmk
+*.fls
