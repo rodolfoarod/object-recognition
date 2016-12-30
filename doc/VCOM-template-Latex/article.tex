@@ -3,7 +3,7 @@
 % VCOM - CHANGES
 \usepackage[utf8]{inputenc}
 \renewcommand{\abstractname}{Resumo}
-%\renewcommand{\refname}{Referências}
+\renewcommand{\refname}{Referências}
 
 %% Enter your paper number here for the review copy
 %\vcomreviewcopy{??}
@@ -41,7 +41,7 @@
 \maketitle
 
 \begin{abstract}
-Trabalhos recente na área da Visão por computador permitiram o desenvolvimento de novos métodos como redes neuronais pondo os métodos clássicos em segundo plano como as \textit{Support Vector Machines} (SVN). 
+Trabalhos recentes na área da visão por computador permitiram o desenvolvimento de novos métodos como redes neuronais pondo os métodos clássicos em segundo plano como as \textit{Support Vector Machines} (SVN). 
 
 O objetivo principal deste projeto consiste em desenvolver um sistema que pode reconhecer e classificar um objeto presente numa imagem como sendo um objeto que pertence a uma de 10 classes diferentes. Para tal, usou-se e comparou-se dois métodos diferentes para reconhecer os objetos nas imagens. Utilizou-se uma rede neuronal convolucional e SVN usando \textit{Bag of Words} (BoF) constituídos por descritores obtidos através do algoritmo SIFT. 
 
@@ -144,7 +144,7 @@ Concluímos que, nos problemas de reconhecimento de objetos, as redes neuronais 
 
 %------------------------------------------------------------------------
 \section{Melhoramentos Futuros}
-Relativamente às variantes da abordagem SVM seria interessante realizar o processo de treino dos classificadores SVM de forma a obter os parâmetros ótimos com base na estimativa de \textit{cross-validation}. Outra melhoria do trabalho realizado seria a utilização de um \textit{dataset} maior na variante OAA SVM \textit{Balanced} porque o \textit{dataset} utilizado para cada um dos classificadores SVM desta variante é um quinto do dataset utilizado nas outras duas variantes. 
+Relativamente às variantes da abordagem SVM seria interessante realizar o processo de treino dos classificadores SVM de forma a obter os parâmetros ótimos com base na estimativa do erro da validação cruzada. Outra melhoria do trabalho realizado seria a utilização de um \textit{dataset} maior na variante OAA SVM \textit{Balanced} porque o \textit{dataset} utilizado para cada um dos classificadores SVM desta variante é um quinto do dataset utilizado nas outras duas variantes. 
 
 No caso da rede neuronal convoluncional, como já foi referido, devido à dificuldade em prever o impacto da estrutura e da configuração da rede nos resultados seria importante despender mais algum tempo na sua otimização.  
 
