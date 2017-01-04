@@ -1,6 +1,6 @@
-// ============================
-// Convolutional Neural Network
-// ============================
+# ============================
+# Convolutional Neural Network
+# ============================
 
 import sys
 import argparse
